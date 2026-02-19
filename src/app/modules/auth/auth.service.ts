@@ -20,7 +20,7 @@ export const register = async (data: z.infer<typeof registerSchema>) => {
       name: data.name,
       email: data.email,
       password: hashedPassword,
-      role: data.role,
+      role: "SOLVER",
     },
   });
 

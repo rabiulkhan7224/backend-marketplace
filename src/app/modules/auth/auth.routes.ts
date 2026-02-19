@@ -15,7 +15,7 @@ router.post('/register',
     controller.login);
 
 router.get('/me', 
-    auth(true),
+    auth(),
     controller.getMe);
 
 

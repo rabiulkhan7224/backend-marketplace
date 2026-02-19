@@ -42,7 +42,7 @@ export const login = async (data:{
   }
 
   const token = jwt.sign(
-    { id: user.id, role: user.role },
+    { user_id: user.id, role: user.role },
     config.jwt_access_token_secret as Secret,
     { expiresIn: config.jwt_access_token_expires_in } as SignOptions
   );

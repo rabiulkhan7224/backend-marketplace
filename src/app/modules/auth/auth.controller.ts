@@ -27,7 +27,16 @@ export const login = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getMe = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.id;
+  if (!req.user || !req.user.user_id) {
+    return sendResponse(res, {
+      status: 401,
+      success: false,
+      message: 'Unauthorized',
+      data: null
+    });
+  }
+  const userId = req.user.user_id;
+  console.log(userId)
   const result = await authService.getMe(userId);
   sendResponse(res, {
     status: 200,

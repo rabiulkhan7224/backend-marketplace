@@ -2,6 +2,7 @@ import { JwtPayload } from 'jsonwebtoken'
 import config from '../config'
 import AppError from '../errors/AppError'
 import { TUserRole } from '../interfaces/userRole_type'
+import { IUserPayload } from '../interfaces/index.d'
 import catchAsync from '../utils/catchAsync'
 import { verifyToken } from '../utils/commonUtils'
 
@@ -65,8 +66,8 @@ const auth = (...rolesAndFlags: Array<TUserRole | boolean>) => {
       if (requiredRoles.length > 0 && !requiredRoles.includes(role)) {
         throw new AppError(403, 'FORBIDDEN', 'You do not have permission to perform this action.');
       }
-    // Attach user to request object
-      req.user = decoded as JwtPayload;
+      // Attach user to request object
+      req.user = decoded as IUserPayload;
       next();
       
   })

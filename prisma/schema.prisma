@@ -25,6 +25,18 @@ enum ProjectStatus {
   COMPLETED
 }
 
+enum RequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum TaskStatus {
+  IN_PROGRESS
+  SUBMITTED
+  COMPLETED
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -32,6 +44,13 @@ model User {
   password  String
   role      Role     @default(BUYER)
   createdAt DateTime @default(now())
+
+  buyerProjects   Project[]       @relation("BuyerProjects")
+  solverProjects  Project[]       @relation("SolverProjects")
+  requests        ProjectRequest[] @relation("SolverRequests")
+
+  @@index([email])
+  @@index([role])
 }
 
 model Project {
@@ -43,12 +62,53 @@ model Project {
   assignedSolverId  String?
   createdAt         DateTime       @default(now())
 
-  // buyer             User            @relation("BuyerProjects", fields: [buyerId], references: [id])
-  // assignedSolver    User?           @relation("SolverProjects", fields: [assignedSolverId], references: [id])
-  // requests          ProjectRequest[]
-  // tasks             Task[]
+  buyer             User            @relation("BuyerProjects", fields: [buyerId], references: [id])
+  assignedSolver    User?           @relation("SolverProjects", fields: [assignedSolverId], references: [id])
+  requests          ProjectRequest[]
+  tasks             Task[]
 
-  // @@index([buyerId])
-  // @@index([assignedSolverId])
-  // @@index([status])
+  @@index([buyerId])
+  @@index([assignedSolverId])
+  @@index([status])
+}
+
+model ProjectRequest {
+  id        String         @id @default(uuid())
+  projectId String
+  solverId  String
+  status    RequestStatus  @default(PENDING)
+
+  project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  solver    User           @relation("SolverRequests", fields: [solverId], references: [id])
+
+  @@unique([projectId, solverId])
+  @@index([projectId])
+  @@index([solverId])
+  @@index([status])
+}
+
+model Task {
+  id          String      @id @default(uuid())
+  projectId   String
+  title       String
+  description String
+  deadline    DateTime
+  status      TaskStatus  @default(IN_PROGRESS)
+
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submission  Submission?
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model Submission {
+  id          String    @id @default(uuid())
+  taskId      String    @unique
+  fileUrl     String
+  submittedAt DateTime  @default(now())
+
+  task        Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId])
 }

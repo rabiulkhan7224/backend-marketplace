@@ -2,12 +2,13 @@
  * User Role Constants
  * Defines available user roles in the application
  */
+// // ADMIN
+//   BUYER
+//   SOLVER
 export const USER_ROLE = {
-  superAdmin: 'superAdmin',
-  admin: 'admin',
-  user: 'user',
-  developer: 'developer',
-  editor: 'editor',
+  BUYER: 'BUYER',
+  SOLVER: 'SOLVER',
+  ADMIN: 'ADMIN',
 } as const;
 
 /**

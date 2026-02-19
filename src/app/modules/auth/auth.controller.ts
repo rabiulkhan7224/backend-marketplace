@@ -25,3 +25,14 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     data: { token: result.token, user: result.user }
   });
 });
+
+export const getMe = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const result = await authService.getMe(userId);
+  sendResponse(res, {
+    status: 200,
+    success: true,
+    message: 'User profile retrieved successfully',
+    data: result
+  });
+});

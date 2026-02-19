@@ -32,3 +32,5 @@ coverage/
 # Prisma 
 prisma/migrations
 src/generated
+
+.vercel

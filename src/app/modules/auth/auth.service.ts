@@ -27,7 +27,10 @@ export const register = async (data: z.infer<typeof registerSchema>) => {
   return { id: user.id, name: user.name, email: user.email, role: user.role };
 };
 
-export const login = async (data: z.infer<typeof loginSchema>) => {
+export const login = async (data:{
+  email: string;
+  password: string;
+}) => {
   const user = await prisma.user.findUnique({ where: { email: data.email } });
   if (!user) {
     throw new AppError('Invalid credentials', 401);

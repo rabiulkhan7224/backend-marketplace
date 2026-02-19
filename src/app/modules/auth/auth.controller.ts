@@ -14,3 +14,14 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     data: result
   });
 });
+
+export const login = catchAsync(async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const result = await authService.login({ email, password });
+  sendResponse(res, {
+    status: 200,
+    success: true,
+    message: 'User logged in successfully',
+    data: { token: result.token, user: result.user }
+  });
+});

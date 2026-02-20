@@ -5,7 +5,7 @@ import taskService from "./task.service";
 
 export const createTask = catchAsync(async (req, res)  => {
   const projectId = req.params.projectId as string;
-  const solverId = (req as any).user.user_id;
+  const solverId = (req as any).user.id;
 
   const validated = createTaskSchema.parse(req.body);
 
@@ -23,7 +23,7 @@ export const getTasks = catchAsync(async (req, res) => {
   const projectId = req.params.projectId as string;
   const user = (req as any).user;
 
-  const tasks = await taskService.getTasksForProject(projectId, user.user_id, user.role);
+  const tasks = await taskService.getTasksForProject(projectId, user.id, user.role);
 
     sendResponse(res, {
     status: 200,
@@ -37,7 +37,7 @@ export const getTask = catchAsync(async (req, res) => {
   const taskId = req.params.id as string;
   const user = (req as any).user;
 
-  const task = await taskService.getTaskById(taskId, user.user_id, user.role);
+  const task = await taskService.getTaskById(taskId, user.id, user.role);
 
     sendResponse(res, {
     status: 200,
@@ -49,7 +49,7 @@ export const getTask = catchAsync(async (req, res) => {
 
 export const updateTaskCtrl = catchAsync(async (req, res) => {
   const taskId = req.params.id as string;
-  const solverId = (req as any).user.user_id;
+  const solverId = (req as any).user.id;
 
   const validated = updateTaskSchema.parse(req.body);
 

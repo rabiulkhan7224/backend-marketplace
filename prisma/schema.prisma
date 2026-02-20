@@ -80,7 +80,7 @@ model ProjectRequest {
 
   project   Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   solver    User           @relation("SolverRequests", fields: [solverId], references: [id])
-
+ createdAt   DateTime    @default(now())
   @@unique([projectId, solverId])
   @@index([projectId])
   @@index([solverId])

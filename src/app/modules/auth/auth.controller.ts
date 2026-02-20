@@ -27,7 +27,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const getMe = catchAsync(async (req: Request, res: Response) => {
-  if (!req.user || !req.user.user_id) {
+  if (!req.user || !req.user.id) {
     return sendResponse(res, {
       status: 401,
       success: false,
@@ -35,7 +35,7 @@ export const getMe = catchAsync(async (req: Request, res: Response) => {
       data: null
     });
   }
-  const userId = req.user.user_id;
+  const userId = req.user.id;
   console.log(userId)
   const result = await authService.getMe(userId);
   sendResponse(res, {

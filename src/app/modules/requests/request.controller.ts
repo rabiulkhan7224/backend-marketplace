@@ -12,6 +12,7 @@ export const requestProject = catchAsync(async (req, res) => {
 });
 
 export const respondRequest = catchAsync(async (req, res) => {
+ 
   const requestId = req.params.id as string;
   const buyerId = (req as any).user.id;
   const { status } = respondRequestSchema.parse(req.body);
@@ -22,6 +23,7 @@ export const respondRequest = catchAsync(async (req, res) => {
 export const getProjectRequests = catchAsync(async (req, res) => {
   const projectId = req.params.id as string;
   const buyerId = (req as any).user.id;
+
   const requests = await service.getRequestsForProject(projectId, buyerId);
   res.json({ status: 'success', data: requests });
 });

@@ -1,6 +1,7 @@
 import { Router } from "express";
 import auth from "../../middlewares/auth";
 import * as controller from "./task.controller";
+import { authMiddleware } from "../../middlewares/newauth";
 
 const router = Router();
 
@@ -14,14 +15,15 @@ router.post(
 // List all tasks for a project (BUYER or assigned SOLVER or ADMIN)
 router.get(
   '/projects/:projectId/tasks',
-  auth(true),
+ authMiddleware,
   controller.getTasks
 );
 
 // Get single task (BUYER or assigned SOLVER or ADMIN)
 router.get(
   '/tasks/:id',
-    auth(true),
+  authMiddleware, 
+    
   controller.getTask
 );
 

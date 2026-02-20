@@ -45,7 +45,13 @@ export const createSubmission = async (
     });
 
     return submission;
-  });
+  }
+  ,
+{
+    maxWait: 5000, 
+    timeout: 10000, 
+  }
+);
 };
 
 export const reviewSubmission = async (

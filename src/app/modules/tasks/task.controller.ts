@@ -22,7 +22,7 @@ export const createTask = catchAsync(async (req, res)  => {
 export const getTasks = catchAsync(async (req, res) => {
   const projectId = req.params.projectId as string;
   const user = (req as any).user;
-
+console.log(user)
   const tasks = await taskService.getTasksForProject(projectId, user.id, user.role);
 
     sendResponse(res, {

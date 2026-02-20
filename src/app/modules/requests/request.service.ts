@@ -5,7 +5,12 @@ import { prisma } from "../../shared/prisma";
 
 
 export const createProjectRequest = async (projectId: string, solverId: string) => {
+ 
+ console.log("projectsid and solverId", projectId, solverId);
+ 
   return prisma.$transaction(async (tx) => {
+    
+    
     const project = await tx.project.findUnique({ where: { id: projectId } });
     if (!project) throw new AppError('Project not found', 404);
     if (project.status !== 'OPEN') {
@@ -28,6 +33,10 @@ export const createProjectRequest = async (projectId: string, solverId: string) 
     });
 
     return request;
+  },{
+    maxWait: 5000, // default is 2000ms, increase if you have long-running transactions
+    timeout: 10000, // default is 5000ms, increase if you have long-running transactions
+
   });
 };
 
@@ -79,6 +88,9 @@ export const respondToRequest = async (
     }
 
     return { requestId, status: action };
+  },{
+    maxWait: 5000, 
+    timeout: 10000, 
   });
 };
 

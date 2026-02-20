@@ -28,3 +28,26 @@ export const getProjectById = async (id: string) => {
     where: { id },
   });
 };
+
+export const tryCompleteProject = async (projectId: string) => {
+  return prisma.$transaction(async (tx) => {
+    const incompleteCount = await tx.task.count({
+      where: {
+        projectId,
+        status: { not: ProjectStatus.COMPLETED },
+      },
+    });
+
+    if (incompleteCount === 0) {
+      const project = await tx.project.findUnique({ where: { id: projectId } });
+      if (project && project.status !== ProjectStatus.COMPLETED) {
+        return tx.project.update({
+          where: { id: projectId },
+          data: { status: ProjectStatus.COMPLETED },
+        });
+      }
+    }
+
+    return null; // no change
+  });
+};

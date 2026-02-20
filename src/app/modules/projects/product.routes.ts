@@ -9,5 +9,7 @@ const router = Router();
 router.post('/', 
     auth("BUYER"),
     controller.createProject);
+router.get('/', controller.getProjects);
+router.get('/:id', controller.getProjectById);
 
 export const projectRoute = router;

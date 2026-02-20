@@ -13,3 +13,35 @@ export const createProject = catchAsync(async (req, res) => {
         data: project
     });
 });
+
+export const getProjects = catchAsync(async (req, res) => {
+    const projects = await ProjectService.getProjects();
+    sendResponse(res, {
+        status: 200,
+        success: true,
+        message: 'Projects retrieved successfully',
+        data: projects
+    });
+});
+
+export const getProjectById = catchAsync(async (req, res) => {
+    const { id } = req.params;
+    const project = await ProjectService.getProjectById(id as string);
+    if (!project) { 
+        return sendResponse(res, {
+          status: 404,
+          success: false,
+          message: 'Project not found',
+          data: undefined
+        });
+    } 
+    sendResponse(res, {
+
+        status: 200,
+        success: true,
+        message: 'Project retrieved successfully',
+        data: project
+    });
+});
+
+

@@ -18,3 +18,13 @@ export const createProject = async (data: CreateProjectInput, buyerId: string) =
     },
   });
 };
+
+export const getProjects = async () => {
+  return prisma.project.findMany();
+};
+
+export const getProjectById = async (id: string) => {
+  return prisma.project.findUnique({
+    where: { id },
+  });
+};

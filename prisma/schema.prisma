@@ -97,6 +97,7 @@ model Task {
 
   project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   submission  Submission?
+  createdAt   DateTime    @default(now())
 
   @@index([projectId])
   @@index([status])

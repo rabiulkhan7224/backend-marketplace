@@ -1,0 +1,856 @@
+{
+  "apiVersion": "1.0.0",
+  "lastUpdated": "2026-02-21",
+  "baseUrl": "http://localhost:5000/api",
+  "baseUrlProduction": "https://your-domain.com/api",
+  "endpoints": {
+    "auth": [
+      {
+        "id": "auth.register",
+        "method": "POST",
+        "endpoint": "/auth/register",
+        "description": "Create a new user account",
+        "requiresAuth": false,
+        "requiredRole": null,
+        "statusCode": 201,
+        "requestBody": {
+          "type": "application/json",
+          "schema": {
+            "name": {
+              "type": "string",
+              "description": "User full name",
+              "minLength": 2,
+              "example": "John Doe"
+            },
+            "email": {
+              "type": "string",
+              "description": "User email address",
+              "format": "email",
+              "example": "john@example.com"
+            },
+            "password": {
+              "type": "string",
+              "description": "User password",
+              "minLength": 8,
+              "example": "SecurePass123"
+            }
+          },
+          "required": ["name", "email", "password"]
+        },
+        "responseExample": {
+          "statusCode": 201,
+          "message": "User registered successfully",
+          "data": {
+            "id": "uuid",
+            "name": "John Doe",
+            "email": "john@example.com",
+            "role": "BUYER",
+            "createdAt": "2026-02-21T10:30:00Z"
+          }
+        },
+        "errorCases": [],
+        "notes": "User account created with default BUYER role"
+      },
+      {
+        "id": "auth.login",
+        "method": "POST",
+        "endpoint": "/auth/login",
+        "description": "Authenticate user and receive tokens",
+        "requiresAuth": false,
+        "requiredRole": null,
+        "statusCode": 200,
+        "requestBody": {
+          "type": "application/json",
+          "schema": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "example": "john@example.com"
+            },
+            "password": {
+              "type": "string",
+              "example": "SecurePass123"
+            }
+          },
+          "required": ["email", "password"]
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Login successful",
+          "data": {
+            "id": "uuid",
+            "name": "John Doe",
+            "email": "john@example.com",
+            "role": "BUYER",
+            "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+            "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 400,
+            "message": "Invalid email or password"
+          }
+        ]
+      },
+      {
+        "id": "auth.getMe",
+        "method": "GET",
+        "endpoint": "/auth/me",
+        "description": "Retrieve current authenticated user's profile",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER", "SOLVER", "ADMIN"],
+        "statusCode": 200,
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "User profile retrieved",
+          "data": {
+            "id": "uuid",
+            "name": "John Doe",
+            "email": "john@example.com",
+            "role": "BUYER",
+            "createdAt": "2026-02-21T10:30:00Z"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 401,
+            "message": "Unauthorized - Invalid or expired token"
+          }
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "id": "project.create",
+        "method": "POST",
+        "endpoint": "/projects",
+        "description": "Create a new project (BUYER only)",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER"],
+        "statusCode": 201,
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "requestBody": {
+          "type": "application/json",
+          "schema": {
+            "title": {
+              "type": "string",
+              "description": "Project title",
+              "example": "Build Mobile App"
+            },
+            "description": {
+              "type": "string",
+              "description": "Detailed project description",
+              "example": "Create a cross-platform mobile application"
+            }
+          },
+          "required": ["title", "description"]
+        },
+        "responseExample": {
+          "statusCode": 201,
+          "message": "Project created successfully",
+          "data": {
+            "id": "uuid",
+            "title": "Build Mobile App",
+            "description": "Create a cross-platform mobile application",
+            "status": "OPEN",
+            "buyerId": "uuid",
+            "assignedSolverId": null,
+            "createdAt": "2026-02-21T10:30:00Z"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 403,
+            "message": "Only BUYER role can create projects"
+          }
+        ]
+      },
+      {
+        "id": "project.getAll",
+        "method": "GET",
+        "endpoint": "/projects",
+        "description": "List all projects (paginated)",
+        "requiresAuth": false,
+        "requiredRole": null,
+        "statusCode": 200,
+        "queryParameters": {
+          "page": {
+            "type": "integer",
+            "description": "Page number",
+            "default": 1,
+            "example": 1
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Items per page",
+            "default": 10,
+            "example": 10
+          },
+          "status": {
+            "type": "string",
+            "enum": ["OPEN", "ASSIGNED", "IN_PROGRESS", "COMPLETED"],
+            "description": "Filter by project status",
+            "optional": true
+          }
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Projects retrieved successfully",
+          "data": [
+            {
+              "id": "uuid",
+              "title": "Build Mobile App",
+              "description": "Create a cross-platform mobile application",
+              "status": "OPEN",
+              "buyerId": "uuid",
+              "assignedSolverId": null,
+              "createdAt": "2026-02-21T10:30:00Z"
+            }
+          ],
+          "pagination": {
+            "page": 1,
+            "limit": 10,
+            "total": 50
+          }
+        }
+      },
+      {
+        "id": "project.getById",
+        "method": "GET",
+        "endpoint": "/projects/:id",
+        "description": "Retrieve a specific project with all details",
+        "requiresAuth": false,
+        "requiredRole": null,
+        "statusCode": 200,
+        "pathParameters": {
+          "id": {
+            "type": "string",
+            "description": "Project UUID",
+            "required": true,
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Project retrieved successfully",
+          "data": {
+            "id": "uuid",
+            "title": "Build Mobile App",
+            "description": "Create a cross-platform mobile application",
+            "status": "OPEN",
+            "buyerId": "uuid",
+            "buyer": {
+              "id": "uuid",
+              "name": "John Doe",
+              "email": "john@example.com"
+            },
+            "assignedSolverId": null,
+            "assignedSolver": null,
+            "createdAt": "2026-02-21T10:30:00Z",
+            "tasks": [
+              {
+                "id": "uuid",
+                "title": "Design UI",
+                "status": "IN_PROGRESS"
+              }
+            ]
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 404,
+            "message": "Project not found"
+          }
+        ]
+      }
+    ],
+    "requests": [
+      {
+        "id": "request.create",
+        "method": "POST",
+        "endpoint": "/projects/:id/request",
+        "description": "SOLVER sends a request to work on an OPEN project",
+        "requiresAuth": true,
+        "requiredRole": ["SOLVER"],
+        "statusCode": 201,
+        "pathParameters": {
+          "id": {
+            "type": "string",
+            "description": "Project UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "requestBody": {
+          "type": "application/json",
+          "description": "Empty body - solverId extracted from JWT token"
+        },
+        "responseExample": {
+          "statusCode": 201,
+          "message": "Project request created successfully",
+          "data": {
+            "id": "uuid",
+            "projectId": "uuid",
+            "solverId": "uuid",
+            "status": "PENDING",
+            "createdAt": "2026-02-21T10:30:00Z"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 404,
+            "message": "Project not found"
+          },
+          {
+            "statusCode": 400,
+            "message": "Project not OPEN or already requested by this solver"
+          },
+          {
+            "statusCode": 403,
+            "message": "Only SOLVER role can create requests"
+          }
+        ]
+      },
+      {
+        "id": "request.respond",
+        "method": "PATCH",
+        "endpoint": "/projects/:id/respond",
+        "description": "BUYER accepts or rejects a SOLVER's request",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER"],
+        "statusCode": 200,
+        "pathParameters": {
+          "id": {
+            "type": "string",
+            "description": "Project UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "requestBody": {
+          "type": "application/json",
+          "schema": {
+            "status": {
+              "type": "string",
+              "enum": ["ACCEPTED", "REJECTED"],
+              "description": "Response action"
+            }
+          },
+          "required": ["status"]
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Request accepted successfully",
+          "data": {
+            "requestId": "uuid",
+            "status": "ACCEPTED",
+            "projectStatus": "ASSIGNED",
+            "assignedSolverId": "uuid",
+            "rejectedRequestCount": 3
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 403,
+            "message": "Not the project owner (BUYER)"
+          },
+          {
+            "statusCode": 400,
+            "message": "Request already processed or project not OPEN"
+          }
+        ]
+      },
+      {
+        "id": "request.getProjectRequests",
+        "method": "GET",
+        "endpoint": "/projects/:id/requests",
+        "description": "BUYER views all SOLVERs who requested their project",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER"],
+        "statusCode": 200,
+        "pathParameters": {
+          "id": {
+            "type": "string",
+            "description": "Project UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "queryParameters": {
+          "status": {
+            "type": "string",
+            "enum": ["PENDING", "ACCEPTED", "REJECTED"],
+            "description": "Filter by request status",
+            "optional": true
+          }
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Project requests retrieved successfully",
+          "data": [
+            {
+              "id": "uuid",
+              "projectId": "uuid",
+              "status": "PENDING",
+              "solver": {
+                "id": "uuid",
+                "name": "Jane Smith",
+                "email": "jane@example.com"
+              },
+              "createdAt": "2026-02-21T10:30:00Z"
+            }
+          ]
+        },
+        "errorCases": [
+          {
+            "statusCode": 403,
+            "message": "Not the project owner (BUYER)"
+          }
+        ]
+      }
+    ],
+    "tasks": [
+      {
+        "id": "task.create",
+        "method": "POST",
+        "endpoint": "/tasks/projects/:projectId/tasks",
+        "description": "SOLVER creates a task for an assigned project",
+        "requiresAuth": true,
+        "requiredRole": ["SOLVER"],
+        "statusCode": 201,
+        "pathParameters": {
+          "projectId": {
+            "type": "string",
+            "description": "Project UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "requestBody": {
+          "type": "application/json",
+          "schema": {
+            "title": {
+              "type": "string",
+              "description": "Task title",
+              "minLength": 3,
+              "example": "Design Login Screen"
+            },
+            "description": {
+              "type": "string",
+              "description": "Detailed task description",
+              "minLength": 10,
+              "example": "Create a responsive login screen with email/password authentication"
+            },
+            "deadline": {
+              "type": "string",
+              "format": "ISO 8601 datetime",
+              "description": "Task deadline",
+              "example": "2026-03-15T18:00:00Z"
+            }
+          },
+          "required": ["title", "description", "deadline"]
+        },
+        "responseExample": {
+          "statusCode": 201,
+          "message": "Task created successfully",
+          "data": {
+            "id": "uuid",
+            "projectId": "uuid",
+            "title": "Design Login Screen",
+            "description": "Create a responsive login screen with email/password authentication",
+            "deadline": "2026-03-15T18:00:00Z",
+            "status": "IN_PROGRESS",
+            "createdAt": "2026-02-21T10:30:00Z"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 403,
+            "message": "Not assigned SOLVER or project not ASSIGNED"
+          },
+          {
+            "statusCode": 400,
+            "message": "Invalid deadline format or past date"
+          }
+        ]
+      },
+      {
+        "id": "task.getProjectTasks",
+        "method": "GET",
+        "endpoint": "/tasks/projects/:projectId/tasks",
+        "description": "List all tasks for a project (BUYER or assigned SOLVER)",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER", "SOLVER"],
+        "statusCode": 200,
+        "pathParameters": {
+          "projectId": {
+            "type": "string",
+            "description": "Project UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "queryParameters": {
+          "status": {
+            "type": "string",
+            "enum": ["IN_PROGRESS", "SUBMITTED", "COMPLETED"],
+            "description": "Filter by task status",
+            "optional": true
+          },
+          "sortBy": {
+            "type": "string",
+            "enum": ["deadline", "createdAt"],
+            "description": "Sort by field",
+            "optional": true
+          },
+          "order": {
+            "type": "string",
+            "enum": ["asc", "desc"],
+            "description": "Sort order",
+            "optional": true
+          }
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Tasks retrieved successfully",
+          "data": [
+            {
+              "id": "uuid",
+              "projectId": "uuid",
+              "title": "Design Login Screen",
+              "description": "Create a responsive login screen with email/password authentication",
+              "deadline": "2026-03-15T18:00:00Z",
+              "status": "IN_PROGRESS",
+              "createdAt": "2026-02-21T10:30:00Z",
+              "submission": null
+            }
+          ]
+        }
+      },
+      {
+        "id": "task.getById",
+        "method": "GET",
+        "endpoint": "/tasks/tasks/:id",
+        "description": "Retrieve a specific task with details and submission",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER", "SOLVER"],
+        "statusCode": 200,
+        "pathParameters": {
+          "id": {
+            "type": "string",
+            "description": "Task UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Task retrieved successfully",
+          "data": {
+            "id": "uuid",
+            "projectId": "uuid",
+            "title": "Design Login Screen",
+            "description": "Create a responsive login screen with email/password authentication",
+            "deadline": "2026-03-15T18:00:00Z",
+            "status": "IN_PROGRESS",
+            "createdAt": "2026-02-21T10:30:00Z",
+            "submission": null
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 404,
+            "message": "Task not found"
+          },
+          {
+            "statusCode": 403,
+            "message": "Unauthorized access to this task"
+          }
+        ]
+      },
+      {
+        "id": "task.update",
+        "method": "PATCH",
+        "endpoint": "/tasks/tasks/:id",
+        "description": "SOLVER updates task metadata before submission",
+        "requiresAuth": true,
+        "requiredRole": ["SOLVER"],
+        "statusCode": 200,
+        "pathParameters": {
+          "id": {
+            "type": "string",
+            "description": "Task UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "requestBody": {
+          "type": "application/json",
+          "description": "All fields optional, at least one required",
+          "schema": {
+            "title": {
+              "type": "string",
+              "minLength": 3,
+              "optional": true
+            },
+            "description": {
+              "type": "string",
+              "minLength": 10,
+              "optional": true
+            },
+            "deadline": {
+              "type": "string",
+              "format": "ISO 8601 datetime",
+              "optional": true
+            }
+          }
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Task updated successfully",
+          "data": {
+            "id": "uuid",
+            "projectId": "uuid",
+            "title": "Design Login Screen",
+            "description": "Create a responsive login screen with email/password authentication",
+            "deadline": "2026-03-15T18:00:00Z",
+            "status": "IN_PROGRESS",
+            "updatedAt": "2026-02-21T11:00:00Z"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 400,
+            "message": "No fields provided or task already SUBMITTED"
+          },
+          {
+            "statusCode": 403,
+            "message": "Not assigned SOLVER"
+          }
+        ]
+      }
+    ],
+    "submissions": [
+      {
+        "id": "submission.create",
+        "method": "POST",
+        "endpoint": "/submissions/tasks/:taskId/submit",
+        "description": "SOLVER uploads a ZIP file submission for a task",
+        "requiresAuth": true,
+        "requiredRole": ["SOLVER"],
+        "statusCode": 201,
+        "pathParameters": {
+          "taskId": {
+            "type": "string",
+            "description": "Task UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>",
+          "Content-Type": "multipart/form-data"
+        },
+        "requestBody": {
+          "type": "multipart/form-data",
+          "schema": {
+            "file": {
+              "type": "file",
+              "description": "ZIP archive containing submission files",
+              "maxSize": "50 MB",
+              "required": true
+            }
+          }
+        },
+        "responseExample": {
+          "statusCode": 201,
+          "message": "Submission created successfully",
+          "data": {
+            "id": "uuid",
+            "taskId": "uuid",
+            "fileUrl": "https://storage.example.com/submissions/file.zip",
+            "submittedAt": "2026-02-21T12:00:00Z",
+            "taskStatus": "SUBMITTED"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 400,
+            "message": "Task already submitted or file validation failed"
+          },
+          {
+            "statusCode": 403,
+            "message": "Not assigned SOLVER"
+          },
+          {
+            "statusCode": 413,
+            "message": "File too large (max 50 MB)"
+          }
+        ]
+      },
+      {
+        "id": "submission.review",
+        "method": "PATCH",
+        "endpoint": "/submissions/tasks/:taskId/review",
+        "description": "BUYER reviews and accepts/rejects SOLVER's submission",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER"],
+        "statusCode": 200,
+        "pathParameters": {
+          "taskId": {
+            "type": "string",
+            "description": "Task UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "requestBody": {
+          "type": "application/json",
+          "schema": {
+            "action": {
+              "type": "string",
+              "enum": ["ACCEPT", "REJECT"],
+              "description": "Review action"
+            },
+            "comment": {
+              "type": "string",
+              "maxLength": 500,
+              "description": "Optional review comment",
+              "optional": true
+            }
+          },
+          "required": ["action"]
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Submission accepted successfully",
+          "data": {
+            "taskId": "uuid",
+            "taskStatus": "COMPLETED",
+            "action": "ACCEPT",
+            "comment": null,
+            "reviewedAt": "2026-02-21T13:00:00Z"
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 400,
+            "message": "Submission not found or already reviewed"
+          },
+          {
+            "statusCode": 403,
+            "message": "Not project owner (BUYER)"
+          }
+        ]
+      },
+      {
+        "id": "submission.getById",
+        "method": "GET",
+        "endpoint": "/submissions/tasks/:taskId/submission",
+        "description": "Retrieve submission details (BUYER, SOLVER, or ADMIN)",
+        "requiresAuth": true,
+        "requiredRole": ["BUYER", "SOLVER", "ADMIN"],
+        "statusCode": 200,
+        "pathParameters": {
+          "taskId": {
+            "type": "string",
+            "description": "Task UUID",
+            "required": true
+          }
+        },
+        "requestHeaders": {
+          "Authorization": "Bearer <accessToken>"
+        },
+        "responseExample": {
+          "statusCode": 200,
+          "message": "Submission retrieved successfully",
+          "data": {
+            "id": "uuid",
+            "taskId": "uuid",
+            "task": {
+              "id": "uuid",
+              "title": "Design Login Screen",
+              "projectId": "uuid"
+            },
+            "fileUrl": "https://storage.example.com/submissions/file.zip",
+            "submittedAt": "2026-02-21T12:00:00Z",
+            "reviewComment": null,
+            "reviewedAt": null
+          }
+        },
+        "errorCases": [
+          {
+            "statusCode": 404,
+            "message": "Submission not found"
+          },
+          {
+            "statusCode": 403,
+            "message": "Unauthorized (not related to task/project)"
+          }
+        ]
+      }
+    ]
+  },
+  "roles": [
+    {
+      "name": "BUYER",
+      "description": "User who posts projects and reviews submissions",
+      "permissions": ["createProject", "viewRequests", "respondToRequest", "reviewSubmission", "viewTasks"]
+    },
+    {
+      "name": "SOLVER",
+      "description": "User who requests projects, creates tasks, and submits solutions",
+      "permissions": ["requestProject", "createTask", "updateTask", "submitTask", "viewSubmission"]
+    },
+    {
+      "name": "ADMIN",
+      "description": "Full system access",
+      "permissions": ["all"]
+    }
+  ],
+  "statuses": {
+    "projectStatus": ["OPEN", "ASSIGNED", "IN_PROGRESS", "COMPLETED"],
+    "requestStatus": ["PENDING", "ACCEPTED", "REJECTED"],
+    "taskStatus": ["IN_PROGRESS", "SUBMITTED", "COMPLETED"],
+    "userRole": ["ADMIN", "BUYER", "SOLVER"]
+  },
+  "errorCodes": {
+    "P2001": {
+      "message": "Record not found",
+      "description": "The requested record does not exist in the database"
+    },
+    "P2002": {
+      "message": "Unique constraint failed",
+      "description": "Attempted to create a duplicate record (e.g., email already exists)"
+    },
+    "P2025": {
+      "message": "Record to update not found",
+      "description": "Cannot perform operation on a deleted or non-existent record"
+    },
+    "P2028": {
+      "message": "Transaction timeout",
+      "description": "Connection pool exhausted or transaction took too long"
+    }
+  }
+}

@@ -1,4 +1,3 @@
-// src/modules/submissions/routes.ts
 import { Router } from 'express';
 import * as controller from './submission.controller';
 import { roleMiddleware } from '../../middlewares/role';

@@ -43,5 +43,24 @@ export const getProjectById = catchAsync(async (req, res) => {
         data: project
     });
 });
-
+// authenticated version of getProjectById with access control
+export const getProjectByIdAuth = catchAsync(async (req, res) => {
+  const projectId = req.params.id as string;
+  const user = (req as any).user;
+    const project = await ProjectService.getProjectByIdAuth(projectId, user.id, user.role); 
+    if (!project) {
+        return sendResponse(res, {
+          status: 404,  
+            success: false,
+            message: 'Project not found',
+            data: undefined
+        });
+    }
+    sendResponse(res, {
+        status: 200,
+        success: true,
+        message: 'Project retrieved successfully',
+        data: project
+    });
+});
 
